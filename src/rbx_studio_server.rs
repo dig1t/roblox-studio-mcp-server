@@ -107,9 +107,172 @@ struct InsertModel {
 }
 
 #[derive(Debug, Deserialize, Serialize, schemars::JsonSchema, Clone)]
+struct Position {
+    x: f64,
+    y: f64,
+    z: f64,
+}
+
+#[derive(Debug, Deserialize, Serialize, schemars::JsonSchema, Clone)]
+struct Rotation {
+    x: f64,
+    y: f64,
+    z: f64,
+}
+
+#[derive(Debug, Deserialize, Serialize, schemars::JsonSchema, Clone)]
+struct Scale {
+    x: f64,
+    y: f64,
+    z: f64,
+}
+
+#[derive(Debug, Deserialize, Serialize, schemars::JsonSchema, Clone)]
+struct BatchModelEntry {
+    #[schemars(description = "Query to search for the model in the marketplace")]
+    query: String,
+    #[schemars(description = "Position to place the model (x, y, z)")]
+    position: Option<Position>,
+    #[schemars(description = "Rotation in degrees (x, y, z)")]
+    rotation: Option<Rotation>,
+    #[schemars(description = "Scale multiplier (x, y, z)")]
+    scale: Option<Scale>,
+    #[schemars(description = "Custom name for the inserted model")]
+    name: Option<String>,
+    #[schemars(description = "Parent instance path (defaults to workspace)")]
+    parent: Option<String>,
+}
+
+#[derive(Debug, Deserialize, Serialize, schemars::JsonSchema, Clone)]
+struct BatchInsertModels {
+    #[schemars(description = "Array of models to insert")]
+    models: Vec<BatchModelEntry>,
+}
+
+#[derive(Debug, Deserialize, Serialize, schemars::JsonSchema, Clone)]
+struct ScriptEntry {
+    #[schemars(description = "Luau code to execute")]
+    code: String,
+    #[schemars(description = "Optional description of what this script does")]
+    description: Option<String>,
+}
+
+#[derive(Debug, Deserialize, Serialize, schemars::JsonSchema, Clone)]
+struct BatchRunCode {
+    #[schemars(description = "Array of scripts to execute sequentially")]
+    scripts: Vec<ScriptEntry>,
+    #[schemars(description = "Stop execution if any script fails (default: true)")]
+    stop_on_error: Option<bool>,
+}
+
+#[derive(Debug, Deserialize, Serialize, schemars::JsonSchema, Clone)]
+struct Region {
+    #[schemars(description = "Minimum corner position")]
+    min: Position,
+    #[schemars(description = "Maximum corner position")]
+    max: Position,
+}
+
+#[derive(Debug, Deserialize, Serialize, schemars::JsonSchema, Clone)]
+struct HeightmapConfig {
+    #[schemars(description = "Type of heightmap: flat, perlin, or ridged")]
+    heightmap_type: String,
+    #[schemars(description = "Height variation amplitude")]
+    amplitude: Option<f64>,
+    #[schemars(description = "Detail level/frequency")]
+    frequency: Option<f64>,
+    #[schemars(description = "Random seed for noise generation")]
+    seed: Option<i32>,
+}
+
+#[derive(Debug, Deserialize, Serialize, schemars::JsonSchema, Clone)]
+struct GenerateTerrain {
+    #[schemars(description = "Region to generate terrain in (min/max positions)")]
+    region: Region,
+    #[schemars(description = "Terrain material: Grass, Sand, Rock, Snow, Mud, Ground, Slate, Concrete, Brick, Cobblestone, Ice, Salt, Sandstone, Limestone, Asphalt, LeafyGrass, Pavement")]
+    material: String,
+    #[schemars(description = "Heightmap configuration (type, amplitude, frequency, seed)")]
+    heightmap: Option<HeightmapConfig>,
+    #[schemars(description = "Y level for water fill")]
+    water_level: Option<f64>,
+}
+
+#[derive(Debug, Deserialize, Serialize, schemars::JsonSchema, Clone)]
+struct FillTerrainRegion {
+    #[schemars(description = "Region to fill (min/max positions)")]
+    region: Region,
+    #[schemars(description = "Terrain material to fill with")]
+    material: String,
+    #[schemars(description = "Only fill empty space (air)")]
+    replace_air: Option<bool>,
+}
+
+#[derive(Debug, Deserialize, Serialize, schemars::JsonSchema, Clone)]
+struct SculptPoint {
+    #[schemars(description = "Position to sculpt at")]
+    position: Position,
+    #[schemars(description = "Radius of sculpting effect")]
+    radius: f64,
+    #[schemars(description = "Strength of effect (positive = raise, negative = lower)")]
+    strength: f64,
+    #[schemars(description = "Optional material to use")]
+    material: Option<String>,
+}
+
+#[derive(Debug, Deserialize, Serialize, schemars::JsonSchema, Clone)]
+struct SculptTerrain {
+    #[schemars(description = "Array of points to sculpt")]
+    points: Vec<SculptPoint>,
+    #[schemars(description = "Sculpting mode: add, subtract, paint, or smooth")]
+    mode: String,
+}
+
+#[derive(Debug, Deserialize, Serialize, schemars::JsonSchema, Clone)]
+struct ClearWorkspace {
+    #[schemars(description = "Preserve the camera")]
+    preserve_camera: Option<bool>,
+    #[schemars(description = "Preserve terrain")]
+    preserve_terrain: Option<bool>,
+    #[schemars(description = "Instance names to preserve (e.g., ['SpawnLocation', 'Baseplate'])")]
+    preserve_names: Option<Vec<String>>,
+    #[schemars(description = "Optional region to clear (only removes objects within this region)")]
+    region: Option<Region>,
+}
+
+#[derive(Debug, Deserialize, Serialize, schemars::JsonSchema, Clone)]
+struct SaveScene {
+    #[schemars(description = "Name/identifier for this scene snapshot")]
+    name: String,
+    #[schemars(description = "Optional region to save (only saves objects within this region)")]
+    region: Option<Region>,
+    #[schemars(description = "Instance names to exclude from save")]
+    exclude_names: Option<Vec<String>>,
+}
+
+#[derive(Debug, Deserialize, Serialize, schemars::JsonSchema, Clone)]
+struct LoadScene {
+    #[schemars(description = "Name of the previously saved scene to load")]
+    name: String,
+    #[schemars(description = "Position offset to apply to loaded objects")]
+    position: Option<Position>,
+    #[schemars(description = "Parent instance path (defaults to workspace)")]
+    parent: Option<String>,
+    #[schemars(description = "Clear workspace before loading")]
+    clear_existing: Option<bool>,
+}
+
+#[derive(Debug, Deserialize, Serialize, schemars::JsonSchema, Clone)]
 enum ToolArgumentValues {
     RunCode(RunCode),
     InsertModel(InsertModel),
+    BatchInsertModels(BatchInsertModels),
+    BatchRunCode(BatchRunCode),
+    GenerateTerrain(GenerateTerrain),
+    FillTerrainRegion(FillTerrainRegion),
+    SculptTerrain(SculptTerrain),
+    ClearWorkspace(ClearWorkspace),
+    SaveScene(SaveScene),
+    LoadScene(LoadScene),
 }
 #[tool_router]
 impl RBXStudioServer {
@@ -139,6 +302,94 @@ impl RBXStudioServer {
         Parameters(args): Parameters<InsertModel>,
     ) -> Result<CallToolResult, ErrorData> {
         self.generic_tool_run(ToolArgumentValues::InsertModel(args))
+            .await
+    }
+
+    #[tool(
+        description = "Inserts multiple models from the Roblox marketplace in a single call. Each model can have custom position, rotation, scale, name, and parent. Returns JSON with inserted count, failures, and instance paths."
+    )]
+    async fn batch_insert_models(
+        &self,
+        Parameters(args): Parameters<BatchInsertModels>,
+    ) -> Result<CallToolResult, ErrorData> {
+        self.generic_tool_run(ToolArgumentValues::BatchInsertModels(args))
+            .await
+    }
+
+    #[tool(
+        description = "Executes multiple Luau scripts sequentially with shared state between them. Scripts can store values in _G to pass data to subsequent scripts. Returns JSON with execution results for each script."
+    )]
+    async fn batch_run_code(
+        &self,
+        Parameters(args): Parameters<BatchRunCode>,
+    ) -> Result<CallToolResult, ErrorData> {
+        self.generic_tool_run(ToolArgumentValues::BatchRunCode(args))
+            .await
+    }
+
+    #[tool(
+        description = "Generates terrain using noise-based heightmaps. Supports flat, perlin, and ridged noise types. Can optionally fill water below a specified level."
+    )]
+    async fn generate_terrain(
+        &self,
+        Parameters(args): Parameters<GenerateTerrain>,
+    ) -> Result<CallToolResult, ErrorData> {
+        self.generic_tool_run(ToolArgumentValues::GenerateTerrain(args))
+            .await
+    }
+
+    #[tool(
+        description = "Fills a terrain region with a specific material. Can optionally only fill empty space (air)."
+    )]
+    async fn fill_terrain_region(
+        &self,
+        Parameters(args): Parameters<FillTerrainRegion>,
+    ) -> Result<CallToolResult, ErrorData> {
+        self.generic_tool_run(ToolArgumentValues::FillTerrainRegion(args))
+            .await
+    }
+
+    #[tool(
+        description = "Sculpts terrain by raising, lowering, painting, or smoothing at specified points. Each point has position, radius, and strength."
+    )]
+    async fn sculpt_terrain(
+        &self,
+        Parameters(args): Parameters<SculptTerrain>,
+    ) -> Result<CallToolResult, ErrorData> {
+        self.generic_tool_run(ToolArgumentValues::SculptTerrain(args))
+            .await
+    }
+
+    #[tool(
+        description = "Clears objects from the workspace. Can optionally preserve camera, terrain, and specific named instances. Can also clear only within a region."
+    )]
+    async fn clear_workspace(
+        &self,
+        Parameters(args): Parameters<ClearWorkspace>,
+    ) -> Result<CallToolResult, ErrorData> {
+        self.generic_tool_run(ToolArgumentValues::ClearWorkspace(args))
+            .await
+    }
+
+    #[tool(
+        description = "Saves a snapshot of the current workspace to memory with a given name. Can optionally save only objects within a region or exclude specific objects."
+    )]
+    async fn save_scene(
+        &self,
+        Parameters(args): Parameters<SaveScene>,
+    ) -> Result<CallToolResult, ErrorData> {
+        self.generic_tool_run(ToolArgumentValues::SaveScene(args))
+            .await
+    }
+
+    #[tool(
+        description = "Loads a previously saved scene snapshot by name. Can apply position offset and optionally clear workspace before loading."
+    )]
+    async fn load_scene(
+        &self,
+        Parameters(args): Parameters<LoadScene>,
+    ) -> Result<CallToolResult, ErrorData> {
+        self.generic_tool_run(ToolArgumentValues::LoadScene(args))
             .await
     }
 
