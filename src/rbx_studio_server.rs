@@ -274,6 +274,50 @@ struct GetConsoleLogs {
 }
 
 #[derive(Debug, Deserialize, Serialize, schemars::JsonSchema, Clone)]
+struct GetWorkspaceStats {
+    #[schemars(description = "Optional path to analyze (defaults to entire Workspace)")]
+    path: Option<String>,
+    #[schemars(description = "Include size distribution histogram")]
+    include_sizes: Option<bool>,
+    #[schemars(description = "Include color distribution")]
+    include_colors: Option<bool>,
+}
+
+#[derive(Debug, Deserialize, Serialize, schemars::JsonSchema, Clone)]
+struct GetChildrenInfo {
+    #[schemars(description = "Path to parent instance (e.g., 'workspace', 'workspace.MyModel', 'game.Lighting')")]
+    path: String,
+    #[schemars(description = "Include bounding box information for each child (min, max, size, center)")]
+    include_bounds: Option<bool>,
+}
+
+#[derive(Debug, Deserialize, Serialize, schemars::JsonSchema, Clone)]
+struct GetModelBounds {
+    #[schemars(description = "Path to instance (e.g., 'Workspace.GrandCanyon.CanyonWalls')")]
+    path: String,
+}
+
+#[derive(Debug, Deserialize, Serialize, schemars::JsonSchema, Clone)]
+struct FindGaps {
+    #[schemars(description = "Path to first model/part")]
+    model_a: String,
+    #[schemars(description = "Path to second model/part")]
+    model_b: String,
+    #[schemars(description = "Maximum distance to consider a 'gap' (default: 2 studs)")]
+    threshold: Option<f64>,
+}
+
+#[derive(Debug, Deserialize, Serialize, schemars::JsonSchema, Clone)]
+struct CaptureViewport {
+    #[schemars(description = "Optional: Set camera position before capture")]
+    camera_position: Option<Position>,
+    #[schemars(description = "Optional: Set camera look-at target")]
+    camera_target: Option<Position>,
+    #[schemars(description = "Image format: 'png' or 'jpg' (informational only, actual format depends on manual screenshot)")]
+    format: Option<String>,
+}
+
+#[derive(Debug, Deserialize, Serialize, schemars::JsonSchema, Clone)]
 enum ToolArgumentValues {
     RunCode(RunCode),
     InsertModel(InsertModel),
@@ -286,6 +330,11 @@ enum ToolArgumentValues {
     SaveScene(SaveScene),
     LoadScene(LoadScene),
     GetConsoleLogs(GetConsoleLogs),
+    GetWorkspaceStats(GetWorkspaceStats),
+    GetChildrenInfo(GetChildrenInfo),
+    GetModelBounds(GetModelBounds),
+    FindGaps(FindGaps),
+    CaptureViewport(CaptureViewport),
 }
 #[tool_router]
 impl RBXStudioServer {
@@ -414,6 +463,61 @@ impl RBXStudioServer {
         Parameters(args): Parameters<GetConsoleLogs>,
     ) -> Result<CallToolResult, ErrorData> {
         self.generic_tool_run(ToolArgumentValues::GetConsoleLogs(args))
+            .await
+    }
+
+    #[tool(
+        description = "Gets statistics about the workspace including part count, model count, size distribution, and color distribution. Useful for analyzing scene complexity and visual composition."
+    )]
+    async fn get_workspace_stats(
+        &self,
+        Parameters(args): Parameters<GetWorkspaceStats>,
+    ) -> Result<CallToolResult, ErrorData> {
+        self.generic_tool_run(ToolArgumentValues::GetWorkspaceStats(args))
+            .await
+    }
+
+    #[tool(
+        description = "Gets information about all children of a specified instance. Returns name, className, and part count for each child. Optionally includes bounding box information (min, max, size, center coordinates). Useful for exploring scene hierarchy and understanding model composition."
+    )]
+    async fn get_children_info(
+        &self,
+        Parameters(args): Parameters<GetChildrenInfo>,
+    ) -> Result<CallToolResult, ErrorData> {
+        self.generic_tool_run(ToolArgumentValues::GetChildrenInfo(args))
+            .await
+    }
+
+    #[tool(
+        description = "Gets the bounding box of a Model or BasePart instance. Returns min, max, size, and center positions. Useful for calculating placement positions or determining object dimensions."
+    )]
+    async fn get_model_bounds(
+        &self,
+        Parameters(args): Parameters<GetModelBounds>,
+    ) -> Result<CallToolResult, ErrorData> {
+        self.generic_tool_run(ToolArgumentValues::GetModelBounds(args))
+            .await
+    }
+
+    #[tool(
+        description = "Finds gaps between two models or parts by raycasting from surface points of model_a toward model_b. Returns gap positions, distances, and nearest points on both models. Useful for detecting holes or misalignments between adjacent geometry. Limited to 50 gap results."
+    )]
+    async fn find_gaps(
+        &self,
+        Parameters(args): Parameters<FindGaps>,
+    ) -> Result<CallToolResult, ErrorData> {
+        self.generic_tool_run(ToolArgumentValues::FindGaps(args))
+            .await
+    }
+
+    #[tool(
+        description = "Positions the camera for viewport capture. Optionally sets camera position and look-at target. Returns the final camera state. Note: Actual screenshot capture requires manual action (Ctrl+Shift+S in Studio) or using Studio's File > Screenshot menu."
+    )]
+    async fn capture_viewport(
+        &self,
+        Parameters(args): Parameters<CaptureViewport>,
+    ) -> Result<CallToolResult, ErrorData> {
+        self.generic_tool_run(ToolArgumentValues::CaptureViewport(args))
             .await
     }
 

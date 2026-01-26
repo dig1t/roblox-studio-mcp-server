@@ -111,6 +111,33 @@ export type GetConsoleLogsArgs = {
 	clear_after_read: boolean?,
 }
 
+export type GetWorkspaceStatsArgs = {
+	path: string?,
+	include_sizes: boolean?,
+	include_colors: boolean?,
+}
+
+export type GetChildrenInfoArgs = {
+	path: string,
+	include_bounds: boolean?,
+}
+
+export type GetModelBoundsArgs = {
+	path: string,
+}
+
+export type FindGapsArgs = {
+	model_a: string,
+	model_b: string,
+	threshold: number?,
+}
+
+export type CaptureViewportArgs = {
+	camera_position: Position?,
+	camera_target: Position?,
+	format: string?,
+}
+
 export type ToolArgs =
 	{ InsertModel: InsertModelArgs } |
 	{ RunCode: RunCodeArgs } |
@@ -122,7 +149,12 @@ export type ToolArgs =
 	{ ClearWorkspace: ClearWorkspaceArgs } |
 	{ SaveScene: SaveSceneArgs } |
 	{ LoadScene: LoadSceneArgs } |
-	{ GetConsoleLogs: GetConsoleLogsArgs }
+	{ GetConsoleLogs: GetConsoleLogsArgs } |
+	{ GetWorkspaceStats: GetWorkspaceStatsArgs } |
+	{ GetChildrenInfo: GetChildrenInfoArgs } |
+	{ GetModelBounds: GetModelBoundsArgs } |
+	{ FindGaps: FindGapsArgs } |
+	{ CaptureViewport: CaptureViewportArgs }
 
 export type ToolFunction = (ToolArgs) -> string?
 
