@@ -1,6 +1,7 @@
 local Main = script:FindFirstAncestor("MCPStudioPlugin")
 local MockWebSocketService = require(Main.MockWebSocketService)
 local Types = require(Main.Types)
+local ConsoleBuffer = require(Main.ConsoleBuffer)
 
 local ChangeHistoryService = game:GetService("ChangeHistoryService")
 local HttpService = game:GetService("HttpService")
@@ -33,6 +34,9 @@ local function fetchBuiltinTools()
 end
 
 local tools = fetchBuiltinTools()
+
+-- Initialize console log capture buffer
+ConsoleBuffer.initialize()
 
 local function connectWebSocket()
 	local client = MockWebSocketService:CreateClient(URI)

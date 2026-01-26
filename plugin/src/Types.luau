@@ -104,6 +104,13 @@ export type LoadSceneArgs = {
 	clear_existing: boolean?,
 }
 
+export type GetConsoleLogsArgs = {
+	since_sequence: number?,
+	level_filter: string?,
+	limit: number?,
+	clear_after_read: boolean?,
+}
+
 export type ToolArgs =
 	{ InsertModel: InsertModelArgs } |
 	{ RunCode: RunCodeArgs } |
@@ -114,7 +121,8 @@ export type ToolArgs =
 	{ SculptTerrain: SculptTerrainArgs } |
 	{ ClearWorkspace: ClearWorkspaceArgs } |
 	{ SaveScene: SaveSceneArgs } |
-	{ LoadScene: LoadSceneArgs }
+	{ LoadScene: LoadSceneArgs } |
+	{ GetConsoleLogs: GetConsoleLogsArgs }
 
 export type ToolFunction = (ToolArgs) -> string?
 

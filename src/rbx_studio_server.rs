@@ -262,6 +262,18 @@ struct LoadScene {
 }
 
 #[derive(Debug, Deserialize, Serialize, schemars::JsonSchema, Clone)]
+struct GetConsoleLogs {
+    #[schemars(description = "Only return logs with sequence number greater than this value. Use for polling to get new logs since last request.")]
+    since_sequence: Option<i64>,
+    #[schemars(description = "Filter logs by level: 'all' (default), 'info', 'warn', or 'error'. 'error' returns only errors, 'warn' returns warnings and errors, 'info' returns all.")]
+    level_filter: Option<String>,
+    #[schemars(description = "Maximum number of log entries to return (default: 100, max: 500)")]
+    limit: Option<i32>,
+    #[schemars(description = "Clear the log buffer after reading (default: false)")]
+    clear_after_read: Option<bool>,
+}
+
+#[derive(Debug, Deserialize, Serialize, schemars::JsonSchema, Clone)]
 enum ToolArgumentValues {
     RunCode(RunCode),
     InsertModel(InsertModel),
@@ -273,6 +285,7 @@ enum ToolArgumentValues {
     ClearWorkspace(ClearWorkspace),
     SaveScene(SaveScene),
     LoadScene(LoadScene),
+    GetConsoleLogs(GetConsoleLogs),
 }
 #[tool_router]
 impl RBXStudioServer {
@@ -390,6 +403,17 @@ impl RBXStudioServer {
         Parameters(args): Parameters<LoadScene>,
     ) -> Result<CallToolResult, ErrorData> {
         self.generic_tool_run(ToolArgumentValues::LoadScene(args))
+            .await
+    }
+
+    #[tool(
+        description = "Retrieves console logs from Roblox Studio. Captures all print(), warn(), and error() output as well as Roblox engine messages. Supports polling with sequence numbers, level filtering, and pagination."
+    )]
+    async fn get_console_logs(
+        &self,
+        Parameters(args): Parameters<GetConsoleLogs>,
+    ) -> Result<CallToolResult, ErrorData> {
+        self.generic_tool_run(ToolArgumentValues::GetConsoleLogs(args))
             .await
     }
 
