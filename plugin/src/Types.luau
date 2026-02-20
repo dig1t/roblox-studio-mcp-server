@@ -138,23 +138,40 @@ export type CaptureViewportArgs = {
 	format: string?,
 }
 
+export type TestMode = "start_play" | "run_server"
+
+export type StartStopPlayMode = TestMode | "stop"
+
+export type StartStopPlayArgs = {
+	mode: StartStopPlayMode,
+}
+
+export type RunScriptInPlayModeArgs = {
+	code: string,
+	timeout: number?,
+	mode: TestMode,
+}
+
 export type ToolArgs =
-	{ InsertModel: InsertModelArgs } |
-	{ RunCode: RunCodeArgs } |
-	{ BatchInsertModels: BatchInsertModelsArgs } |
-	{ BatchRunCode: BatchRunCodeArgs } |
-	{ GenerateTerrain: GenerateTerrainArgs } |
-	{ FillTerrainRegion: FillTerrainRegionArgs } |
-	{ SculptTerrain: SculptTerrainArgs } |
-	{ ClearWorkspace: ClearWorkspaceArgs } |
-	{ SaveScene: SaveSceneArgs } |
-	{ LoadScene: LoadSceneArgs } |
-	{ GetConsoleLogs: GetConsoleLogsArgs } |
-	{ GetWorkspaceStats: GetWorkspaceStatsArgs } |
-	{ GetChildrenInfo: GetChildrenInfoArgs } |
-	{ GetModelBounds: GetModelBoundsArgs } |
-	{ FindGaps: FindGapsArgs } |
-	{ CaptureViewport: CaptureViewportArgs }
+	{}
+	| { InsertModel: InsertModelArgs }
+	| { RunCode: RunCodeArgs }
+	| { BatchInsertModels: BatchInsertModelsArgs }
+	| { BatchRunCode: BatchRunCodeArgs }
+	| { GenerateTerrain: GenerateTerrainArgs }
+	| { FillTerrainRegion: FillTerrainRegionArgs }
+	| { SculptTerrain: SculptTerrainArgs }
+	| { ClearWorkspace: ClearWorkspaceArgs }
+	| { SaveScene: SaveSceneArgs }
+	| { LoadScene: LoadSceneArgs }
+	| { GetConsoleLogs: GetConsoleLogsArgs }
+	| { GetWorkspaceStats: GetWorkspaceStatsArgs }
+	| { GetChildrenInfo: GetChildrenInfoArgs }
+	| { GetModelBounds: GetModelBoundsArgs }
+	| { FindGaps: FindGapsArgs }
+	| { CaptureViewport: CaptureViewportArgs }
+	| { StartStopPlay: StartStopPlayArgs }
+	| { RunScriptInPlayMode: RunScriptInPlayModeArgs }
 
 export type ToolFunction = (ToolArgs) -> string?
 
